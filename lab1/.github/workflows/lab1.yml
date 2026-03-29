@@ -1,0 +1,42 @@
+name: Lab 1 Grading
+
+on: [push]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up .env from secrets
+        run: |
+          echo "BOT_TOKEN=${{ secrets.BOT_TOKEN }}" >> .env
+          echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env
+          echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
+          echo "DB_USER=${{ secrets.DB_USER }}" >> .env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+          echo "DB_PORT=${{ secrets.DB_PORT }}" >> .env
+
+      - name: Build and Start Containers
+        run: docker compose up -d --build
+
+      - name: Wait for DB Readiness
+        run: |
+          for i in {1..20}; do
+            if docker inspect --format='{{json .State.Health.Status}}' app | grep -q "healthy"; then
+              echo "App is ready!"
+              break
+            fi
+            echo "Waiting for app..."
+            sleep 5
+          done
+
+      - name: Teardown
+        run: docker compose down -v
+
+      - name: Run Grading Script
+        run: |
+          chmod +x ./tests/lab1_test.sh
+          ./tests/lab1_test.sh
