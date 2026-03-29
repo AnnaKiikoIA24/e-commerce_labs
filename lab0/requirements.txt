@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+aiogram==2.25.1
+sqlalchemy
+psycopg2-binary
+alembic
+pytest
+structlog
+python-dotenv
+json-log-formatter
