@@ -20,7 +20,14 @@ jobs:
           echo "DB_PORT=${{ secrets.DB_PORT }}" >> .env
 
       - name: Build and Start Containers
-        run: docker compose -f lab1/docker-compose.yml up -d --build
+        run: |
+          docker compose -f lab1/docker-compose.yml up -d --build \
+            -e BOT_TOKEN=${{ secrets.BOT_TOKEN }} \
+            -e DB_HOST=${{ secrets.DB_HOST }} \
+            -e DB_NAME=${{ secrets.DB_NAME }} \
+            -e DB_USER=${{ secrets.DB_USER }} \
+            -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
+            -e DB_PORT=${{ secrets.DB_PORT }}
 
       - name: Wait for App Readiness
         run: |
