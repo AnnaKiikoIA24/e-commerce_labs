@@ -10,29 +10,24 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up .env from secrets
+      - name: Set up .env from GitHub Secrets
         run: |
-          echo "BOT_TOKEN=${{ secrets.BOT_TOKEN }}" >> .env
-          echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env
-          echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
-          echo "DB_USER=${{ secrets.DB_USER }}" >> .env
-          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
-          echo "DB_PORT=${{ secrets.DB_PORT }}" >> .env
+          mkdir -p lab1
+          echo "BOT_TOKEN=${{ secrets.BOT_TOKEN }}" > lab1/.env
+          echo "DB_HOST=${{ secrets.DB_HOST }}" >> lab1/.env
+          echo "DB_NAME=${{ secrets.DB_NAME }}" >> lab1/.env
+          echo "DB_USER=${{ secrets.DB_USER }}" >> lab1/.env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> lab1/.env
+          echo "DB_PORT=${{ secrets.DB_PORT }}" >> lab1/.env
 
       - name: Build and Start Containers
-        run: |
-          docker compose -f lab1/docker-compose.yml up -d --build \
-            -e BOT_TOKEN=${{ secrets.BOT_TOKEN }} \
-            -e DB_HOST=${{ secrets.DB_HOST }} \
-            -e DB_NAME=${{ secrets.DB_NAME }} \
-            -e DB_USER=${{ secrets.DB_USER }} \
-            -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
-            -e DB_PORT=${{ secrets.DB_PORT }}
+        run: docker compose -f lab1/docker-compose.yml up -d --build
 
+      # 4. Чекаємо готовність сервісу app
       - name: Wait for App Readiness
         run: |
           for i in {1..20}; do
-            if docker inspect --format='{{json .State.Health.Status}}' lab1_app_1 | grep -q "healthy"; then
+            if docker inspect --format='{{json .State.Health.Status}}' app | grep -q "healthy"; then
               echo "App is ready!"
               break
             fi
