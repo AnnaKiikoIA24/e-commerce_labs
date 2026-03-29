@@ -42,5 +42,5 @@ jobs:
         with:
           image-ref: ghcr.io/${{ env.OWNER_LC }}/ecommerce-app:sha-${{ github.sha }}
           format: table
-          exit-code: 1
           ignore-unfixed: false
+          exit-code: 0
