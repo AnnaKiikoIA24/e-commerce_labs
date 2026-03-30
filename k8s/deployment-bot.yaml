@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ecommerce-bot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ecommerce-bot
+  template:
+    metadata:
+      labels:
+        app: ecommerce-bot
+    spec:
+      initContainers:
+      - name: wait-for-postgres
+        image: busybox
+        command: ['sh', '-c', 'until nc -z $DB_HOST $DB_PORT; do echo waiting for db; sleep 2; done;']
+        env:
+        - name: DB_HOST
+          valueFrom:
+            secretKeyRef:
+              name: app-secret
+              key: DB_HOST
+        - name: DB_PORT
+          valueFrom:
+            secretKeyRef:
+              name: app-secret
+              key: DB_PORT
+      containers:
+      - name: bot
+        image: ecommerce-app:lab3
+        env:
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: app-secret
+              key: DB_USER
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: app-secret
+              key: DB_PASSWORD
+        - name: DB_NAME
+          valueFrom:
+            secretKeyRef:
+              name: app-secret
+              key: DB_NAME
+        - name: DB_HOST
+          valueFrom:
+            secretKeyRef:
+              name: app-secret
+              key: DB_HOST
+        - name: DB_PORT
+          valueFrom:
+            secretKeyRef:
+              name: app-secret
+              key: DB_PORT
+        command: ["python", "-m", "app.bot"]

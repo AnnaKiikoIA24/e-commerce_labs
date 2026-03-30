@@ -1,0 +1,53 @@
+name: Lab3 Kubernetes Test
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  k8s-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 1. Встановити kubectl
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v3
+
+      # 2. Встановити KinD
+      - name: Install KinD
+        run: |
+          curl -Lo ./kind https://kind.sigs.k8s.io/dl/latest/kind-linux-amd64
+          chmod +x ./kind
+          sudo mv ./kind /usr/local/bin/kind
+
+      # 3. Створити кластер
+      - name: Create cluster
+        run: kind create cluster
+
+      # 4. Завантажити Docker image в кластер
+      - name: Load Docker image into KinD
+        run: |
+          docker pull ghcr.io/${{ github.repository_owner }}/ecommerce-app:latest
+          kind load docker-image ghcr.io/${{ github.repository_owner }}/ecommerce-app:latest
+
+      # 5. Застосувати маніфести
+      - name: Apply manifests
+        run: kubectl apply -f k8s/
+
+      # 6. Дочекатися запуску api та bot pods
+      - name: Wait for API pods
+        run: kubectl wait --for=condition=ready pod -l app=ecommerce-api --timeout=120s
+
+      - name: Wait for Bot pods
+        run: kubectl wait --for=condition=ready pod -l app=ecommerce-bot --timeout=120s
+
+      # 7. Master validation script
+      - name: Run validation
+        run: |
+          echo "Cluster status:"
+          kubectl get pods -o wide
+          kubectl get svc -o wide
