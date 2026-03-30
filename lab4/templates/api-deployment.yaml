@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "lab4.name" . }}-api
+  labels:
+    {{- include "lab4.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount.api }}
+  selector:
+    matchLabels:
+      app: {{ include "lab4.name" . }}-api
+  template:
+    metadata:
+      labels:
+        app: {{ include "lab4.name" . }}-api
+    spec:
+      containers:
+        - name: api
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.service.apiPort }}
+          env:
+            - name: DB_USER
+              value: {{ .Values.env.DB_USER }}
+            - name: DB_PASSWORD
+              value: {{ .Values.env.DB_PASSWORD }}
+            - name: DB_NAME
+              value: {{ .Values.env.DB_NAME }}
+            - name: DB_HOST
+              value: {{ .Values.env.DB_HOST }}
+            - name: DB_PORT
+              value: {{ .Values.env.DB_PORT }}
+          resources:
+            {{- toYaml .Values.resources.api | nindent 12 }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.service.apiPort }}
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.service.apiPort }}
+            initialDelaySeconds: 5
+            periodSeconds: 5

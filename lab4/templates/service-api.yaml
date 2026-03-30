@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "lab4.name" . }}-api
+  labels:
+    {{- include "lab4.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  selector:
+    app: {{ include "lab4.name" . }}-api
+  ports:
+    - protocol: TCP
+      port: {{ .Values.service.apiPort }}
+      targetPort: {{ .Values.service.apiPort }}

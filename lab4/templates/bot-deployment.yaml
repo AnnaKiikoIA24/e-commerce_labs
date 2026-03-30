@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "lab4.name" . }}-bot
+  labels:
+    {{- include "lab4.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount.bot }}
+  selector:
+    matchLabels:
+      app: {{ include "lab4.name" . }}-bot
+  template:
+    metadata:
+      labels:
+        app: {{ include "lab4.name" . }}-bot
+    spec:
+      containers:
+        - name: bot
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: DB_USER
+              value: {{ .Values.env.DB_USER }}
+            - name: DB_PASSWORD
+              value: {{ .Values.env.DB_PASSWORD }}
+            - name: DB_NAME
+              value: {{ .Values.env.DB_NAME }}
+            - name: DB_HOST
+              value: {{ .Values.env.DB_HOST }}
+            - name: DB_PORT
+              value: {{ .Values.env.DB_PORT }}
+          resources:
+            {{- toYaml .Values.resources.bot | nindent 12 }}

@@ -1,0 +1,31 @@
+replicaCount:
+  api: 3
+  bot: 2
+
+image:
+  repository: lab4-ecommerce
+  tag: latest
+  pullPolicy: Always
+
+resources:
+  api:
+    limits:
+      cpu: 1
+      memory: 1Gi
+    requests:
+      cpu: 500m
+      memory: 512Mi
+  bot:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+
+env:
+  DB_USER: prod_user
+  DB_PASSWORD: prod_password
+  DB_NAME: ecommerce
+  DB_HOST: prod-db-host
+  DB_PORT: "5432"

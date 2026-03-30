@@ -1,0 +1,10 @@
+aiogram==2.25.1
+python-dotenv==1.0.1
+structlog==23.3.0
+python-json-logger==2.0.7
+fastapi
+uvicorn
+sqlalchemy
+psycopg2-binary
+json-log-formatter
+alembic==1.11.1
